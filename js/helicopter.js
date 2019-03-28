@@ -3,11 +3,16 @@ class Helicopter {
     constructor() {
         this.position = [0,0];
         this.rotation = 0;
-        this.speed = 1;
+        this.speed = 0;
     }
     // update the helicopter on each frame
     update(deltaTime) {
         check(isNumber(deltaTime));
+        if(!Input.leftPressed && !Input.rightPressed && !Input.upPressed && !Input.downPressed) {
+            this.speed = 0;
+        } else {
+            this.speed = 0.5;
+        }
 
         // rotate the head
         if (Input.leftPressed) {
