@@ -1,3 +1,5 @@
+"use strict";
+
 class Helicopter extends GameObject{
     // initialisation
     constructor() {
@@ -5,6 +7,13 @@ class Helicopter extends GameObject{
         this.translation = [0,0];
         this.rotation = 0;
         this.speed = 0;
+        const nSides = 64;
+        this.points = new Float32Array(nSides * 2);
+
+        for (let i = 0; i < nSides; i++) {
+            this.points[2*i] = Math.cos(i * 2 * Math.PI/nSides);     // TODO: set the x coordinate;
+            this.points[2*i+1] = Math.sin(i * 2 * Math.PI/nSides);   // TODO: set the y coordiante
+        }
     }
     // update the helicopter on each frame
     update(deltaTime) {
@@ -17,23 +26,29 @@ class Helicopter extends GameObject{
 
         // rotate the head
         if (Input.leftPressed) {
-            this.rotation = Math.PI;
+            this.translation[0] -= this.speed * deltaTime;
         }
         else if (Input.rightPressed) {
-            this.rotation = 0;
+            this.translation[0] += this.speed * deltaTime;
         }
         else if (Input.upPressed) {
-            this.rotation = Math.PI/2;
+            this.translation[1] += this.speed * deltaTime;
         }
         else if (Input.downPressed) {
-            this.rotation = 3*Math.PI/2;
+            this.translation[1] -= this.speed * deltaTime;
+        }
+        else if (Input.mouseClicked) {
+            console.log(Input.xCoordinate, Input.yCoordinate);
+            this.translation = [Input.xCoordinate, Input.yCoordinate];
+            // this.translation[0] += Input.xCoordinate * this.speed * deltaTime;
+            // this.translation[1] += Input.yCoordinate * this.speed * deltaTime;
         }
 
         // move in the current direction
-        this.translation[0] +=
-            Math.cos(this.rotation) * this.speed * deltaTime;
-        this.translation[1] +=
-            Math.sin(this.rotation) * this.speed * deltaTime;
+        // this.translation[0] +=
+        //     Math.cos(this.rotation) * this.speed * deltaTime;
+        // this.translation[1] +=
+        //     Math.sin(this.rotation) * this.speed * deltaTime;
     }
     // draw the helicopter
     renderSelf(gl, colourUniform) {
@@ -42,12 +57,8 @@ class Helicopter extends GameObject{
 
         gl.uniform4fv(colourUniform, [0.5,0.5,0.5,1]);
 
-        // draw the helicopter
-        const helicopter = new Float32Array([0,-0.5, 0,0.5, 1,0]);
-        gl.bufferData(gl.ARRAY_BUFFER,
-            helicopter, gl.STATIC_DRAW);
-
-        gl.drawArrays(gl.TRIANGLES, 0, helicopter.length / 2);
+        gl.bufferData(gl.ARRAY_BUFFER, this.points, gl.STATIC_DRAW);
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, this.points.length/2);
 
     }
 }

@@ -23,6 +23,7 @@ void main() {
   gl_FragColor = u_colour; 
 }
 `;
+var frontRotor, backRotor;
 
 function createShader(gl, type, source) {
     check(isContext(gl), isString(source));
@@ -119,7 +120,11 @@ function main() {
     let update = function (deltaTime) {
         check(isNumber(deltaTime));
 
+        frontRotor.rotation -= Math.PI * 2 * deltaTime;
+        backRotor.rotation += Math.PI * 2 * deltaTime;
+
         helicopter.update(deltaTime);
+
     };
 
     // redraw the scene
@@ -164,7 +169,17 @@ function main() {
 // Returns initialized helicopter
 function initHelicopter() {
     const helicopter = new Helicopter();
-    helicopter.scale = [0.2, 0.2];
+    helicopter.scale = [0.1, 0.2];
+
+    frontRotor = new Rotor();
+    frontRotor.parent = helicopter;
+    frontRotor.translation = [0,0.5];
+
+    backRotor = new Rotor();
+    backRotor.parent = helicopter;
+    backRotor.scale = [0.5,0.5];
+    backRotor.translation = [0,-0.9];
+
     return helicopter;
 }
 
@@ -220,4 +235,3 @@ function initHouses() {
     }
     return houses;
 }
-
