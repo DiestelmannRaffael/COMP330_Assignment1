@@ -57,24 +57,23 @@ function createProgram(gl, vertexShader, fragmentShader) {
     return program;
 }
 
- function resize(canvas) {
+function resize(canvas) {
     check(isCanvas(canvas));
 
     const resolution = window.devicePixelRatio || 1.0;
 
-    const displayWidth = 
+    const displayWidth =
         Math.floor(canvas.clientWidth * resolution);
-    const displayHeight = 
+    const displayHeight =
         Math.floor(canvas.clientHeight * resolution);
 
     if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
         canvas.width = canvas.clientWidth;
         canvas.height = canvas.clientHeight;
         return true;
-    }
-    else {
+    } else {
         return false;
-    }    
+    }
 }
 
 function main() {
@@ -89,18 +88,18 @@ function main() {
         window.alert("WebGL not supported!");
         return;
     }
-    
+
     // create GLSL shaders, upload the GLSL source, compile the shaders
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
-    const program =  createProgram(gl, vertexShader, fragmentShader);
+    const program = createProgram(gl, vertexShader, fragmentShader);
     gl.useProgram(program);
 
 
     // Initialise the shader attributes & uniforms
     const positionAttribute = gl.getAttribLocation(program, "a_position");
     const worldMatrixUniform = gl.getUniformLocation(program, "u_worldMatrix");
-    const colourUniform = gl.getUniformLocation(program,"u_colour");
+    const colourUniform = gl.getUniformLocation(program, "u_colour");
 
     // Initialise the array buffer
     const positionBuffer = gl.createBuffer();
@@ -108,30 +107,23 @@ function main() {
     gl.enableVertexAttribArray(positionAttribute);
     gl.vertexAttribPointer(positionAttribute, 2, gl.FLOAT, false, 0, 0);
 
-    
+
     // === Per Frame operations ===
 
+    // Init Game Objects
+    let helicopter = initHelicopter();
+    let houses = initHouses();
+    const river = new River();
+
     // update objects in the scene
-    let update = function(deltaTime) {
+    let update = function (deltaTime) {
         check(isNumber(deltaTime));
 
         helicopter.update(deltaTime);
     };
 
-    const helicopter = new Helicopter();
-    const river = new River();
-    // const house1 = new House(-0.7,0.7);
-    // const house2 = new House(-0.9,0.8);
-    // const house3 = new House(-0.8,0.6);
-    // const house1,house2,house3;
-    let house1, house2, house3;
-    var houses = [
-        house1 = new House(-0.7,0.7),
-        house2 = new House(-0.9,0.8),
-        house3 = new House(-0.85,0.6)];
-
     // redraw the scene
-    let render = function() {
+    let render = function () {
         // clear the screen
         gl.viewport(0, 0, canvas.width, canvas.height);
 
@@ -140,20 +132,20 @@ function main() {
         gl.clearColor(0, 1, 0.1, 1);
         gl.clear(gl.COLOR_BUFFER_BIT);
 
-        for(let i=0; i<houses.length; i++) {
-            houses[i].render(gl, worldMatrixUniform, colourUniform);
+        for (let i = 0; i < houses.length; i++) {
+            houses[i].render(gl, worldMatrixUniform, colourUniform, Matrix.identity());
         }
 
         river.render(gl, worldMatrixUniform, colourUniform);
-        helicopter.render(gl, worldMatrixUniform, colourUniform);
+        helicopter.render(gl, worldMatrixUniform, colourUniform, Matrix.identity());
 
     };
 
     // animation loop
     let oldTime = 0;
-    let animate = function(time) {
+    let animate = function (time) {
         check(isNumber(time));
-        
+
         time = time / 1000;
         let deltaTime = time - oldTime;
         oldTime = time;
@@ -167,5 +159,65 @@ function main() {
 
     // start it going
     animate(0);
-}    
+}
+
+// Returns initialized helicopter
+function initHelicopter() {
+    const helicopter = new Helicopter();
+    helicopter.scale = [0.2, 0.2];
+    return helicopter;
+}
+
+// Returns array of initialized houses
+function initHouses() {
+    //houses
+    var houses = [
+        new House(-0.7, 0.7),
+        new House(-0.9, 0.8),
+        new House(-0.85, 0.6),
+        new House(-0.55, 0.6),
+        new House(-0.55, 0.8),
+    ];
+    for (let i = 0; i < houses.length; i++) {
+        houses[i].scale = [0.2, 0.2];
+    }
+
+    //windows
+    let windows = [];
+    for(let i = 0; i < houses.length; i++) {
+        windows[i] = new Window();
+    }
+    
+    for (let i = 0; i < windows.length; i++) {
+        windows[i].scale = [0.1, 0.1];
+        windows[i].translation = [0.25, 0.5];
+        windows[i].parent = houses[i];
+    }
+
+    //doors
+    let doors = [];
+
+    for(let i = 0; i < houses.length; i++) {
+        doors[i] = new Door();
+    }
+
+    for (let i = 0; i < doors.length; i++) {
+        doors[i].scale = [0.3, 0.3];
+        doors[i].translation = [0.17, 0.02];
+        doors[i].parent = houses[i];
+    }
+
+    //doorknobs
+    let doorknobs = [];
+    for(let i = 0; i < doors.length; i++) {
+        doorknobs[i] = new Circle();
+    }
+
+    for (let i = 0; i < doorknobs.length; i++) {
+        doorknobs[i].scale = [0.1, 0.1];
+        doorknobs[i].translation = [0.35, 0.5];
+        doorknobs[i].parent = doors[i];
+    }
+    return houses;
+}
 

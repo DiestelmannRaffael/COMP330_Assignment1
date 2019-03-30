@@ -1,7 +1,8 @@
-class Helicopter {
+class Helicopter extends GameObject{
     // initialisation
     constructor() {
-        this.position = [0,0];
+        super();
+        this.translation = [0,0];
         this.rotation = 0;
         this.speed = 0;
     }
@@ -29,23 +30,15 @@ class Helicopter {
         }
 
         // move in the current direction
-        this.position[0] +=
+        this.translation[0] +=
             Math.cos(this.rotation) * this.speed * deltaTime;
-        this.position[1] +=
+        this.translation[1] +=
             Math.sin(this.rotation) * this.speed * deltaTime;
     }
     // draw the helicopter
-    render(gl, worldMatrixUniform, colourUniform) {
+    renderSelf(gl, colourUniform) {
         check(isContext(gl),
-            isUniformLocation(worldMatrixUniform, colourUniform));
-
-        // set the uniforms
-        let matrix = Matrix.trs(
-            this.position[0], this.position[1],
-            this.rotation, 0.2, 0.2);
-
-        gl.uniformMatrix3fv(
-            worldMatrixUniform, false, matrix);
+            isUniformLocation(colourUniform));
 
         gl.uniform4fv(colourUniform, [0.5,0.5,0.5,1]);
 
