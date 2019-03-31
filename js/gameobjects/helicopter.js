@@ -8,6 +8,7 @@ class Helicopter extends GameObject{
         this.rotation = 0;
         this.speed = 0;
         const nSides = 64;
+        this.mouseControl = true;
         this.points = new Float32Array(nSides * 2);
 
         for (let i = 0; i < nSides; i++) {
@@ -16,9 +17,10 @@ class Helicopter extends GameObject{
         }
     }
     // update the helicopter on each frame
+    //TODO: Fix bug where position gets set back to click coordinates after control with keyboard.
     update(deltaTime) {
         check(isNumber(deltaTime));
-        if(!Input.leftPressed && !Input.rightPressed && !Input.upPressed && !Input.downPressed) {
+        if(!Input.leftPressed && !Input.rightPressed && !Input.upPressed && !Input.downPressed && !Input.mouseClicked) {
             this.speed = 0;
         } else {
             this.speed = 0.5;
@@ -26,22 +28,37 @@ class Helicopter extends GameObject{
 
         // rotate the head
         if (Input.leftPressed) {
+            this.mouseControl = false;
             this.translation[0] -= this.speed * deltaTime;
         }
         else if (Input.rightPressed) {
+            this.mouseControl = false;
             this.translation[0] += this.speed * deltaTime;
         }
         else if (Input.upPressed) {
+            this.mouseControl = false;
             this.translation[1] += this.speed * deltaTime;
+
         }
         else if (Input.downPressed) {
+            this.mouseControl = false;
             this.translation[1] -= this.speed * deltaTime;
         }
         else if (Input.mouseClicked) {
-            console.log(Input.xCoordinate, Input.yCoordinate);
-            this.translation = [Input.xCoordinate, Input.yCoordinate];
-            // this.translation[0] += Input.xCoordinate * this.speed * deltaTime;
-            // this.translation[1] += Input.yCoordinate * this.speed * deltaTime;
+            this.mouseControl = true;
+            console.log(this.translation[0] + " " + this.translation[1]);
+            if(this.mouseControl) {
+                if (Input.xCoordinate > this.translation[0]) {
+                    this.translation[0] += this.speed * deltaTime;
+                } else {
+                    this.translation[0] -= this.speed * deltaTime;
+                }
+                if (Input.yCoordinate > this.translation[1]) {
+                    this.translation[1] += this.speed * deltaTime;
+                } else {
+                    this.translation[1] -= this.speed * deltaTime;
+                }
+            }
         }
 
         // move in the current direction
@@ -49,6 +66,12 @@ class Helicopter extends GameObject{
         //     Math.cos(this.rotation) * this.speed * deltaTime;
         // this.translation[1] +=
         //     Math.sin(this.rotation) * this.speed * deltaTime;
+    }
+
+    handleMouseClick() {
+        if(Input.xCoordinate > this.translation[0]) {
+            this.translation[0] += this.speed * deltaTime;
+        }
     }
     // draw the helicopter
     renderSelf(gl, colourUniform) {
@@ -61,4 +84,5 @@ class Helicopter extends GameObject{
         gl.drawArrays(gl.TRIANGLE_FAN, 0, this.points.length/2);
 
     }
+
 }

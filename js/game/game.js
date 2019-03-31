@@ -112,9 +112,12 @@ function main() {
     // === Per Frame operations ===
 
     // Init Game Objects
-    let helicopter = initHelicopter();
+    let helipad = initHeliPad();
+    let helicopter = initHelicopter(helipad.translation[0], helipad.translation[1]);
     let houses = initHouses();
+
     const river = new River();
+    const h = new H();
 
     // update objects in the scene
     let update = function (deltaTime) {
@@ -142,6 +145,7 @@ function main() {
         }
 
         river.render(gl, worldMatrixUniform, colourUniform);
+        helipad.render(gl, worldMatrixUniform, colourUniform, Matrix.identity());
         helicopter.render(gl, worldMatrixUniform, colourUniform, Matrix.identity());
 
     };
@@ -167,9 +171,10 @@ function main() {
 }
 
 // Returns initialized helicopter
-function initHelicopter() {
+function initHelicopter(x, y) {
     const helicopter = new Helicopter();
     helicopter.scale = [0.1, 0.2];
+    helicopter.translation = [x, y];
 
     frontRotor = new Rotor();
     frontRotor.parent = helicopter;
@@ -181,6 +186,19 @@ function initHelicopter() {
     backRotor.translation = [0,-0.9];
 
     return helicopter;
+}
+
+function initHeliPad() {
+    const helipad = new Circle(64);
+    helipad.scale = [0.3,0.3];
+    helipad.translation = [0.55, 0.5];
+
+    const h = new H();
+    h.scale = [0.8, 0.8];
+    h.parent = helipad;
+
+
+    return helipad;
 }
 
 // Returns array of initialized houses
@@ -225,7 +243,7 @@ function initHouses() {
     //doorknobs
     let doorknobs = [];
     for(let i = 0; i < doors.length; i++) {
-        doorknobs[i] = new Circle();
+        doorknobs[i] = new Circle(8);
     }
 
     for (let i = 0; i < doorknobs.length; i++) {
